@@ -32,9 +32,13 @@ config IOSCHED_DEADLINE
 	  a new point in the service tree and doing a batch of IO from there
 	  in case of expiry.
 
+config IOSCHED_ZEN
+	tristate "Zen I/O scheduler"
+        default y
+
 config IOSCHED_MAPLE
 	tristate "Maple I/O scheduler"
-	depends on STATE_NOTIFIER
+	default y
 
 config IOSCHED_CFQ
 	tristate "CFQ I/O scheduler"
@@ -122,6 +126,8 @@ config DEFAULT_IOSCHED
 	default "bfq" if DEFAULT_BFQ
 	default "anxiety" if DEFAULT_ANXIETY
 	default "noop" if DEFAULT_NOOP
+	default "fiops" if DEFAULT_FIOPS
+	default "sio" if DEFAULT_SIO
 	default "maple" if DEFAULT_MAPLE
 
 endmenu

@@ -407,8 +407,11 @@ KBUILD_CPPFLAGS := -D__KERNEL__
 KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
-		   -Wno-format-security -Wno-unused \
-		   -Wno-maybe-uninitialized \
+		   -Wno-format-security -Wno-maybe-uninitialized \
+		   -fno-delete-null-pointer-checks \
+		   -O2 -mtune=cortex-a53 -fmodulo-sched -fmodulo-sched-allow-regmoves \
+		   -mfloat-abi=softfp -mfpu=vfpv4 \
+		   -Wno-unused -Wno-array-bounds \
 		   -std=gnu89
 
 KBUILD_AFLAGS_KERNEL :=
@@ -627,7 +630,7 @@ KBUILD_AFLAGS	+= $(call cc-option,-fno-PIE)
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
 else
-KBUILD_CFLAGS	+= -O2
+KBUILD_CFLAGS	+= -O2 $(call cc-disable-warning,maybe-uninitialized,)
 endif
 
 # Tell gcc to never replace conditional load with a non-conditional one

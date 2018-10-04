@@ -117,7 +117,7 @@ make "$device"_defconfig;
 # 2x no. of CPU cores
 make -j$((`nproc --all` * 2));
 
-if [[ -f arch/arm/boot/zImage-dtb ]]; then
+if [[ -f arch/arm/boot/zImage ]]; then
 	echo -e "Code compilation finished on:\n`date +"%A, %d %B %Y @ %H:%M:%S %Z (GMT %:z)"`\n`date --utc +"%A, %d %B %Y @ %H:%M:%S %Z"`\n";
 	maketime=`date +"%s"`;
 	makediff=$(($maketime - $starttime));
@@ -128,8 +128,8 @@ else
 fi;
 
 # Define directories (zip, out)
-maindir=$HOME/Kernel/zip/stock;
-outdir=$HOME/Kernel/out/stock/$device;
+maindir=$HOME/Kernel/zip/stock/oreo;
+outdir=$HOME/Kernel/out/stock/oreo/$device;
 devicedir=$maindir/$device;
 
 # Make the zip and out dirs if they don't exist

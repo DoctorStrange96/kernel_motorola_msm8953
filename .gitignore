@@ -100,3 +100,15 @@ all.config
 
 # fetched Android config fragments
 android/configs/android-*.cfg
+
+# out folder
+out/
+
+# script 
+build.sh
+
+# Anykernel folder
+AnyKernel2/
+
+#Dtbtool folder
+Dtbtool/

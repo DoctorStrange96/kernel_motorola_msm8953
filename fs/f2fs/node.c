@@ -826,9 +826,12 @@ static int truncate_node(struct dnode_of_data *dn)
 	struct f2fs_sb_info *sbi = F2FS_I_SB(dn->inode);
 	struct node_info ni;
 	pgoff_t index;
-	err = f2fs_get_node_info(sbi, dn->nid, &ni);
-	if (err)
-		return err;
+	get_node_info(sbi, dn->nid, &ni);
+	if (dn->inode->i_blocks == 0) {
+		f2fs_bug_on(sbi, ni.blk_addr != NULL_ADDR);
+		goto invalidate;
+	}
+	f2fs_bug_on(sbi, ni.blk_addr == NULL_ADDR);
 
 	/* Deallocate node address */
 	f2fs_invalidate_blocks(sbi, ni.blk_addr);

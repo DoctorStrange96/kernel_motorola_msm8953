@@ -196,6 +196,14 @@ config CPU_FREQ_GOV_ONDEMAND
 	  For details, take a look at linux/Documentation/cpu-freq.
 
 	  If in doubt, say N.
+	  
+config CPU_FREQ_GOV_ONDEMANDX
+	tristate "'ondemandx' cpufreq policy governor"	
+        help
+	  Basically ondemand with suspend/wake profiles. No further
+	  optimization was done to ondemand, to keep it as close to source
+	  as possible.
+          If in doubt, say N.
 
 config CPU_FREQ_GOV_INTERACTIVE
 	bool "'interactive' cpufreq policy governor"

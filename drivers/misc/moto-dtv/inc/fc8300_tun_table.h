@@ -1,9 +1,9 @@
 /*****************************************************************************
-	Copyright(c) 2014 FCI Inc. All Rights Reserved
+	Copyright(c) 2013 FCI Inc. All Rights Reserved
 
-	File name : fci_i2c.h
+	File name : fc8300_tun_table.c
 
-	Description : header of internal i2c driver
+	Description : header of FC8300 tuner driver
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -21,26 +21,24 @@
 
 	History :
 	----------------------------------------------------------------------
-*******************************************************************************/
-#ifndef __FCI_I2C_H__
-#define __FCI_I2C_H__
-
+******************************************************************************/
 #include "fci_types.h"
+
+#ifndef __FC8300_TUN_TABLE_H__
+#define __FC8300_TUN_TABLE_H__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern s32 fci_i2c_init(HANDLE handle, s32 speed, s32 slaveaddr);
-extern s32 fci_i2c_read(HANDLE handle, u8 chip, u8 addr, u8 alen, u8 *data,
-								u8 len);
-extern s32 fci_i2c_write(HANDLE handle, u8 chip, u8 addr, u8 alen, u8 *data,
-								u8 len);
-extern s32 fci_i2c_deinit(HANDLE handle);
+extern u32 ch_mode_0[7][57][20];
+extern u32 ch_mode_1[7][9][16];
+extern u32 ch_mode_4[7][57][20];
+extern u32 ch_mode_5[7][2][16];
+extern u32 ch_mode_6[7][113][21];
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __FCI_I2C_H__ */
-
+#endif /* __FC8300_TUN_TABLE_H__ */

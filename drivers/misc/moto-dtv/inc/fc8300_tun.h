@@ -1,9 +1,9 @@
 /*****************************************************************************
-	Copyright(c) 2014 FCI Inc. All Rights Reserved
+	Copyright(c) 2013 FCI Inc. All Rights Reserved
 
-	File name : fc8180_bb.h
+	File name : fc8300_tun.h
 
-	Description : header of baseband driver
+	Description : header of FC8300 tuner driver
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -22,25 +22,22 @@
 	History :
 	----------------------------------------------------------------------
 *******************************************************************************/
-#ifndef __FC8180_BB__
-#define __FC8180_BB__
-
-#include "fci_types.h"
+#ifndef __FC8300_TUN_H__
+#define __FC8300_TUN_H__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern s32 fc8180_reset(HANDLE handle);
-extern s32 fc8180_probe(HANDLE handle);
-extern s32 fc8180_init(HANDLE handle);
-extern s32 fc8180_deinit(HANDLE handle);
-extern s32 fc8180_scan_status(HANDLE handle);
+extern s32 fc8300_tuner_init(HANDLE handle, DEVICEID devid,
+				enum BROADCAST_TYPE broadcast);
+extern s32 fc8300_set_freq(HANDLE handle, DEVICEID devid, u32 freq);
+extern s32 fc8300_get_rssi(HANDLE handle, DEVICEID devid, s32 *rssi);
+extern s32 fc8300_tuner_deinit(HANDLE handle, DEVICEID devid);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*__FC8180_BB__ */
-
+#endif /* __FC8300_TUN_H__ */
 

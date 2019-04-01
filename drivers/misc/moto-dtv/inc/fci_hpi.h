@@ -1,5 +1,5 @@
 /*****************************************************************************
-	Copyright(c) 2014 FCI Inc. All Rights Reserved
+	Copyright(c) 2013 FCI Inc. All Rights Reserved
 
 	File name : fci_hpi.h
 
@@ -29,12 +29,13 @@
 extern "C" {
 #endif
 
-extern s32 fci_hpi_init(HANDLE handle, s32 speed, s32 slaveaddr);
-extern s32 fci_hpi_read(HANDLE handle, u8 chip, u8 addr, u8 alen, u8 *data,
-								u8 len);
-extern s32 fci_hpi_write(HANDLE handle, u8 chip, u8 addr, u8 alen, u8 *data,
-								u8 len);
-extern s32 fci_hpi_deinit(HANDLE handle);
+extern s32 fci_hpi_init(HANDLE handle, DEVICEID devid,
+		s32 speed, s32 slaveaddr);
+extern s32 fci_hpi_read(HANDLE handle, DEVICEID devid,
+		u8 chip, u8 addr, u8 alen, u8 *data, u8 len);
+extern s32 fci_hpi_write(HANDLE handle, DEVICEID devid,
+		u8 chip, u8 addr, u8 alen, u8 *data, u8 len);
+extern s32 fci_hpi_deinit(HANDLE handle, DEVICEID devid);
 
 #ifdef __cplusplus
 }

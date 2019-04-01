@@ -1,5 +1,5 @@
 /*****************************************************************************
-	Copyright(c) 2014 FCI Inc. All Rights Reserved
+	Copyright(c) 2013 FCI Inc. All Rights Reserved
 
 	File name : fci_oal.c
 
@@ -45,7 +45,7 @@ void print_log(HANDLE handle, s8 *fmt, ...)
 	va_end(ap);
 }
 
-void ms_wait(s32 ms)
+void msWait(s32 ms)
 {
 	mdelay(ms);
 }
@@ -71,3 +71,5 @@ void OAL_RELEASE_SEMAPHORE(void)
 {
 	spin_unlock_irq(&irq_lock);
 }
+
+

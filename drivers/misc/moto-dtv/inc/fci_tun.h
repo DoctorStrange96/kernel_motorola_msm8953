@@ -1,5 +1,5 @@
 /*****************************************************************************
-	Copyright(c) 2014 FCI Inc. All Rights Reserved
+	Copyright(c) 2013 FCI Inc. All Rights Reserved
 
 	File name : fci_tun.h
 
@@ -25,33 +25,33 @@
 #ifndef __FCI_TUN_H__
 #define __FCI_TUN_H__
 
-#include "fci_types.h"
+#define CENTER_SUBCH_NUM    0x16
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 enum I2C_TYPE {
-	FCI_HPI_TYPE        = 0
+	FCI_HPI_TYPE        = 3
 };
 
 enum PRODUCT_TYPE {
-	FC8180_TUNER        = 8180
+	FC8300_TUNER        = 8300,
 };
 
-enum BAND_TYPE {
-	ISDBT_1_SEG_TYPE    = 0
-};
+extern s32 tuner_ctrl_select(HANDLE handle, DEVICEID devid,
+		enum I2C_TYPE type);
+extern s32 tuner_ctrl_deselect(HANDLE handle, DEVICEID devid);
+extern s32 tuner_select(HANDLE handle, DEVICEID devid,
+		enum PRODUCT_TYPE product, enum BROADCAST_TYPE broadcast);
+extern s32 tuner_deselect(HANDLE handle, DEVICEID devid);
 
-extern s32 tuner_ctrl_select(HANDLE handle, enum I2C_TYPE type);
-extern s32 tuner_ctrl_deselect(HANDLE handle);
-extern s32 tuner_select(HANDLE handle, enum PRODUCT_TYPE product,
-					enum BAND_TYPE band);
-extern s32 tuner_deselect(HANDLE handle);
-extern s32 tuner_i2c_read(HANDLE handle, u8 addr, u8 alen, u8 *data, u8 len);
-extern s32 tuner_i2c_write(HANDLE handle, u8 addr, u8 alen, u8 *data, u8 len);
-extern s32 tuner_set_freq(HANDLE handle, u32 freq);
-extern s32 tuner_get_rssi(HANDLE handle, s32 *rssi);
+extern s32 tuner_i2c_read(HANDLE handle, DEVICEID devid,
+		u8 addr, u8 alen, u8 *data, u8 len);
+extern s32 tuner_i2c_write(HANDLE handle, DEVICEID devid,
+		u8 addr, u8 alen, u8 *data, u8 len);
+extern s32 tuner_set_freq(HANDLE handle, DEVICEID devid, u32 freq, u8 subch);
+extern s32 tuner_get_rssi(HANDLE handle, DEVICEID devid, s32 *rssi);
 
 #ifdef __cplusplus
 }

@@ -719,10 +719,10 @@ config FSUSB42_MUX
 	  2 port High Speed USB/UART Switch.
 
 config MOTO_DTV
-	tristate "FC8180 DTV module support"
+	tristate "FC8300 DTV module support"
 	default n
 	help
-	  Enable/disable FC8180 DTV module support
+	  Enable/disable FC8300 DTV module support
 
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"

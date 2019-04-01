@@ -1,7 +1,7 @@
 /*****************************************************************************
 	Copyright(c) 2013 FCI Inc. All Rights Reserved
 
-	File name : fc8180.h
+	File name : fc8300.h
 
 	Description : Header file of Driver
 

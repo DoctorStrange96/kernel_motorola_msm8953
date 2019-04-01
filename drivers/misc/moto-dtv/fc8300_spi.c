@@ -1,7 +1,7 @@
 /*****************************************************************************
-	Copyright(c) 2014 FCI Inc. All Rights Reserved
+	Copyright(c) 2013 FCI Inc. All Rights Reserved
 
-	File name : fc8180_spi.c
+	File name : fc8300_spi.c
 
 	Description : source of SPI interface
 
@@ -22,46 +22,43 @@
 	History :
 	----------------------------------------------------------------------
 *******************************************************************************/
-#include <linux/module.h>
 #include <linux/spi/spi.h>
 #include <linux/slab.h>
-
+#include <linux/module.h>
 
 #include "fci_types.h"
-#include "fc8180_regs.h"
+#include "fc8300_regs.h"
 #include "fci_oal.h"
 
-#define SPI_BMODE           0x00
-#define SPI_WMODE           0x10
-#define SPI_LMODE           0x20
+#define SPI_LEN             0x00 /* or 0x10 */
+#define SPI_REG             0x20
+#define SPI_THR             0x30
 #define SPI_READ            0x40
 #define SPI_WRITE           0x00
 #define SPI_AINC            0x80
-#define CHIPID              (0 << 3)
 
-#define DRIVER_NAME "isdbt_spi"
+#define DRIVER_NAME "fc8300_spi"
 
-struct spi_device *fc8180_spi;
+struct spi_device *fc8300_spi;
 
 static u8 tx_data[10];
-
 #define FEATURE_QSD_BAM
 #ifdef FEATURE_QSD_BAM
 static u8 *wdata_buf;
 static u8 *rdata_buf;
 #else
 static u8 wdata_buf[32] __cacheline_aligned;
-static u8 rdata_buf[8192] __cacheline_aligned;
+static u8 rdata_buf[65536] __cacheline_aligned;
 #endif
 static DEFINE_MUTEX(fci_spi_lock);
-extern  int isdbt_power_init(struct spi_device *spi);
-static int fc8180_spi_probe(struct spi_device *spi)
+
+static int fc8300_spi_probe(struct spi_device *spi)
 {
 	s32 ret;
 
-	print_log(0, "[FC8180] fc8180_spi_probe\n");
+	print_log(0, "fc8300_spi_probe\n");
 
-	spi->max_speed_hz = 19200000;
+	spi->max_speed_hz = 50000000;
 	spi->bits_per_word = 8;
 	spi->mode =  SPI_MODE_0;
 
@@ -70,36 +67,35 @@ static int fc8180_spi_probe(struct spi_device *spi)
 	if (ret < 0)
 		return ret;
 
-	fc8180_spi = spi;
-	isdbt_power_init(spi);
+	fc8300_spi = spi;
+
 	return ret;
 }
 
-
-static int fc8180_spi_remove(struct spi_device *spi)
+static int fc8300_spi_remove(struct spi_device *spi)
 {
 
 	return 0;
 }
 
-struct of_device_id fc8180_match_table[] = {
+struct of_device_id fc8300_match_table[] = {
 	{
 		.compatible = "fci,isdbt",
 	},
 	{}
 };
 
-static struct spi_driver fc8180_spi_driver = {
+static struct spi_driver fc8300_spi_driver = {
 	.driver = {
 		.name		= DRIVER_NAME,
 		.owner		= THIS_MODULE,
-		.of_match_table = fc8180_match_table,
+		.of_match_table = fc8300_match_table,
 	},
-	.probe		= fc8180_spi_probe,
-	.remove		= fc8180_spi_remove,
+	.probe		= fc8300_spi_probe,
+	.remove		= fc8300_spi_remove,
 };
 
-static int fc8180_spi_write_then_read(struct spi_device *spi
+static int fc8300_spi_write_then_read(struct spi_device *spi
 	, u8 *txbuf, u16 tx_length, u8 *rxbuf, u16 rx_length)
 {
 	int res = 0;
@@ -108,7 +104,7 @@ static int fc8180_spi_write_then_read(struct spi_device *spi
 	struct spi_transfer	x;
 
 	if (spi == NULL) {
-		print_log(0, "[FC8180] FC8180_SPI Handle Fail...........\n");
+		print_log(0, "[ERROR] FC8300_SPI Handle Fail...........\n");
 		return BBM_NOK;
 	}
 
@@ -139,81 +135,79 @@ static int fc8180_spi_write_then_read(struct spi_device *spi
 	return res;
 }
 
-static s32 spi_bulkread(HANDLE handle, u16 addr, u8 command, u8 *data,
-							u32 length)
+static s32 spi_bulkread(HANDLE handle, u8 devid,
+		u16 addr, u8 command, u8 *data, u16 length)
 {
 	int res;
 
 	tx_data[0] = addr & 0xff;
 	tx_data[1] = (addr >> 8) & 0xff;
-	tx_data[2] = (command & 0xf0) | CHIPID | ((length >> 16) & 0x07);
-	tx_data[3] = (length >> 8) & 0xff;
-	tx_data[4] = length & 0xff;
+	tx_data[2] = command | devid;
+	tx_data[3] = length & 0xff;
 
-	res = fc8180_spi_write_then_read(fc8180_spi
-		, &tx_data[0], 5, data, length);
+	res = fc8300_spi_write_then_read(fc8300_spi
+		, &tx_data[0], 4, data, length);
 
 	if (res) {
-		print_log(0, "[FC8180] fc8180_spi_bulkread fail : %d\n", res);
+		print_log(0, "fc8300_spi_bulkread fail : %d\n", res);
 		return BBM_NOK;
 	}
 
-	return BBM_OK;
+	return res;
 }
 
-static s32 spi_bulkwrite(HANDLE handle, u16 addr, u8 command, u8 *data,
-							u32 length)
+static s32 spi_bulkwrite(HANDLE handle, u8 devid,
+		u16 addr, u8 command, u8 *data, u16 length)
 {
 	int i;
 	int res;
 
 	tx_data[0] = addr & 0xff;
 	tx_data[1] = (addr >> 8) & 0xff;
-	tx_data[2] = (command & 0xf0) | CHIPID | ((length >> 16) & 0x07);
-	tx_data[3] = (length >> 8) & 0xff;
-	tx_data[4] = length & 0xff;
+	tx_data[2] = command | devid;
+	tx_data[3] = length & 0xff;
 
-	for (i = 0; i < length; i++)
-		tx_data[5 + i] = data[i];
+	for (i = 0 ; i < length ; i++)
+		tx_data[4+i] = data[i];
 
-	res = fc8180_spi_write_then_read(fc8180_spi
-		, &tx_data[0], length + 5, data, 0);
+	res = fc8300_spi_write_then_read(fc8300_spi
+		, &tx_data[0], length+4, NULL, 0);
 
 	if (res) {
-		print_log(0, "[FC8180] fc8180_spi_bulkwrite fail : %d\n", res);
+		print_log(0, "fc8300_spi_bulkwrite fail : %d\n", res);
 		return BBM_NOK;
 	}
 
-	return BBM_OK;
+	return res;
 }
 
-
-static s32 spi_dataread(HANDLE handle, u16 addr, u8 command, u8 *data,
-							u32 length)
+static s32 spi_dataread(HANDLE handle, u8 devid,
+		u16 addr, u8 command, u8 *data, u32 length)
 {
 	int res;
 
 	tx_data[0] = addr & 0xff;
 	tx_data[1] = (addr >> 8) & 0xff;
-	tx_data[2] = (command & 0xf0) | CHIPID | ((length >> 16) & 0x07);
-	tx_data[3] = (length >> 8) & 0xff;
-	tx_data[4] = length & 0xff;
+	tx_data[2] = command | devid;
+	tx_data[3] = length & 0xff;
 
-	res = fc8180_spi_write_then_read(fc8180_spi
-		, &tx_data[0], 5, data, length);
+	res = fc8300_spi_write_then_read(fc8300_spi
+		, &tx_data[0], 4, data, length);
 
 	if (res) {
-		print_log(0, "[FC8180] fc8180_spi_dataread fail : %d\n", res);
+		print_log(0, "fc8300_spi_dataread fail : %d\n", res);
 		return BBM_NOK;
 	}
 
-	return BBM_OK;
+	return res;
 }
 
-s32 fc8180_spi_init(HANDLE handle, u16 param1, u16 param2)
+s32 fc8300_spi_init(HANDLE handle, u16 param1, u16 param2)
 {
 	int res = 0;
-	print_log(0, "fc8180_spi_init : %d\n", res);
+
+	print_log(0, "fc8300_spi_init : %d\n", res);
+
 #ifdef FEATURE_QSD_BAM
 	if (wdata_buf == NULL) {
 		wdata_buf = kmalloc(128, GFP_DMA | GFP_KERNEL);
@@ -225,7 +219,7 @@ s32 fc8180_spi_init(HANDLE handle, u16 param1, u16 param2)
 	}
 
 	if (rdata_buf == NULL) {
-		rdata_buf = kmalloc(8 * 1024, GFP_DMA | GFP_KERNEL);
+		rdata_buf = kmalloc(64 * 1024, GFP_DMA | GFP_KERNEL);
 
 		if (!rdata_buf) {
 			print_log(0, "spi rdata_buf kmalloc fail \n");
@@ -233,133 +227,141 @@ s32 fc8180_spi_init(HANDLE handle, u16 param1, u16 param2)
 		}
 	}
 #endif
-	res = spi_register_driver(&fc8180_spi_driver);
+
+	res = spi_register_driver(&fc8300_spi_driver);
 
 	if (res) {
-		print_log(0, "fc8180_spi register fail : %d\n", res);
+		print_log(0, "fc8300_spi register fail : %d\n", res);
 		return BBM_NOK;
 	}
 
 	return res;
 }
 
-s32 fc8180_spi_byteread(HANDLE handle, u16 addr, u8 *data)
+s32 fc8300_spi_byteread(HANDLE handle, DEVICEID devid, u16 addr, u8 *data)
 {
 	s32 res;
 	u8 command = SPI_READ;
 
 	mutex_lock(&fci_spi_lock);
-	res = spi_bulkread(handle, addr, command, data, 1);
+	res = spi_bulkread(handle, (u8) (devid & 0x000f), addr, command,
+				data, 1);
 	mutex_unlock(&fci_spi_lock);
+
 	return res;
 }
 
-s32 fc8180_spi_wordread(HANDLE handle, u16 addr, u16 *data)
+s32 fc8300_spi_wordread(HANDLE handle, DEVICEID devid, u16 addr, u16 *data)
 {
 	s32 res;
 	u8 command = SPI_READ | SPI_AINC;
 
 	mutex_lock(&fci_spi_lock);
-	res = spi_bulkread(handle, addr, command, (u8 *) data, 2);
+	res = spi_bulkread(handle, (u8) (devid & 0x000f), addr, command,
+				(u8 *)data, 2);
 	mutex_unlock(&fci_spi_lock);
+
 	return res;
 }
 
-s32 fc8180_spi_longread(HANDLE handle, u16 addr, u32 *data)
+s32 fc8300_spi_longread(HANDLE handle, DEVICEID devid, u16 addr, u32 *data)
 {
 	s32 res;
 	u8 command = SPI_READ | SPI_AINC;
 
 	mutex_lock(&fci_spi_lock);
-	res = spi_bulkread(handle, addr, command, (u8 *) data, 4);
+	res = spi_bulkread(handle, (u8) (devid & 0x000f), addr, command,
+				(u8 *)data, 4);
 	mutex_unlock(&fci_spi_lock);
+
 	return res;
 }
 
-s32 fc8180_spi_bulkread(HANDLE handle, u16 addr, u8 *data, u16 length)
+s32 fc8300_spi_bulkread(HANDLE handle, DEVICEID devid,
+		u16 addr, u8 *data, u16 length)
 {
 	s32 res;
 	u8 command = SPI_READ | SPI_AINC;
 
 	mutex_lock(&fci_spi_lock);
-	res = spi_bulkread(handle, addr, command, data, length);
+	res = spi_bulkread(handle, (u8) (devid & 0x000f), addr, command,
+				data, length);
 	mutex_unlock(&fci_spi_lock);
+
 	return res;
 }
 
-s32 fc8180_spi_bytewrite(HANDLE handle, u16 addr, u8 data)
+s32 fc8300_spi_bytewrite(HANDLE handle, DEVICEID devid, u16 addr, u8 data)
 {
 	s32 res;
 	u8 command = SPI_WRITE;
 
 	mutex_lock(&fci_spi_lock);
-
-#ifdef BBM_SPI_IF
-	if (addr == BBM_DM_DATA) {
-#ifdef BBM_SPI_PHA_1
-		u8 ifcommand = 0xff;
-		u16 ifaddr = 0xffff;
-		u8 ifdata = 0xff;
-#else
-		u8 ifcommand = 0x00;
-		u16 ifaddr = 0x0000;
-		u8 ifdata = 0x00;
-#endif
-		res = spi_bulkwrite(handle, ifaddr, ifcommand, &ifdata, 1);
-	} else
-#endif
-	res = spi_bulkwrite(handle, addr, command, (u8 *) &data, 1);
+	res = spi_bulkwrite(handle, (u8) (devid & 0x000f), addr, command,
+				(u8 *)&data, 1);
 	mutex_unlock(&fci_spi_lock);
+
 	return res;
 }
 
-s32 fc8180_spi_wordwrite(HANDLE handle, u16 addr, u16 data)
+s32 fc8300_spi_wordwrite(HANDLE handle, DEVICEID devid, u16 addr, u16 data)
 {
 	s32 res;
 	u8 command = SPI_WRITE | SPI_AINC;
 
 	mutex_lock(&fci_spi_lock);
-	res = spi_bulkwrite(handle, addr, command, (u8 *) &data, 2);
+	res = spi_bulkwrite(handle, (u8) (devid & 0x000f), addr, command,
+				(u8 *)&data, 2);
 	mutex_unlock(&fci_spi_lock);
+
 	return res;
 }
 
-s32 fc8180_spi_longwrite(HANDLE handle, u16 addr, u32 data)
+s32 fc8300_spi_longwrite(HANDLE handle, DEVICEID devid, u16 addr, u32 data)
 {
 	s32 res;
 	u8 command = SPI_WRITE | SPI_AINC;
 
 	mutex_lock(&fci_spi_lock);
-	res = spi_bulkwrite(handle, addr, command, (u8 *) &data, 4);
+	res = spi_bulkwrite(handle, (u8) (devid & 0x000f), addr, command,
+				(u8 *) &data, 4);
 	mutex_unlock(&fci_spi_lock);
+
 	return res;
 }
 
-s32 fc8180_spi_bulkwrite(HANDLE handle, u16 addr, u8 *data, u16 length)
+s32 fc8300_spi_bulkwrite(HANDLE handle, DEVICEID devid,
+		u16 addr, u8 *data, u16 length)
 {
 	s32 res;
 	u8 command = SPI_WRITE | SPI_AINC;
 
 	mutex_lock(&fci_spi_lock);
-	res = spi_bulkwrite(handle, addr, command, data, length);
+	res = spi_bulkwrite(handle, (u8) (devid & 0x000f), addr, command,
+				data, length);
 	mutex_unlock(&fci_spi_lock);
+
 	return res;
 }
 
-s32 fc8180_spi_dataread(HANDLE handle, u16 addr, u8 *data, u32 length)
+s32 fc8300_spi_dataread(HANDLE handle, DEVICEID devid,
+		u16 addr, u8 *data, u32 length)
 {
-	s32 res;
-	u8 command = SPI_READ;
+	s32 res = 0;
 
+	u8 command = SPI_READ | SPI_THR;
 	mutex_lock(&fci_spi_lock);
-	res = spi_dataread(handle, addr, command, data, length);
+	res = spi_dataread(handle, (u8) (devid & 0x000f), addr, command,
+				data, length);
 	mutex_unlock(&fci_spi_lock);
 
 	return res;
 }
 
-s32 fc8180_spi_deinit(HANDLE handle)
+s32 fc8300_spi_deinit(HANDLE handle)
 {
-	spi_unregister_driver(&fc8180_spi_driver);
+	spi_unregister_driver(&fc8300_spi_driver);
+
 	return BBM_OK;
 }
+

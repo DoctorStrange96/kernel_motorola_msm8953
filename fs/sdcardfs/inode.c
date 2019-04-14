@@ -868,10 +868,8 @@ static int sdcardfs_setxattr(struct dentry *dentry, const char *name,
 	const struct cred *saved_cred = NULL;
 
 	saved_cred = override_fsids(SDCARDFS_SB(dentry->d_sb), SDCARDFS_I(inode)->data);
-	if (!saved_cred) {
+	if (!saved_cred)
 		err = -ENOMEM;
-		goto out;
-	}
 
 	sdcardfs_get_lower_path(dentry, &lower_path);
 
@@ -895,10 +893,8 @@ static ssize_t sdcardfs_getxattr(struct dentry *dentry, const char *name,
 	const struct cred *saved_cred = NULL;
 
 	saved_cred = override_fsids(SDCARDFS_SB(dentry->d_sb), SDCARDFS_I(inode)->data);
-	if (!saved_cred) {
+	if (!saved_cred)
 		err = -ENOMEM;
-		goto out;
-	}
 
 	sdcardfs_get_lower_path(dentry, &lower_path);
 

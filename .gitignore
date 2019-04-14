@@ -99,3 +99,6 @@ all.config
 
 # fetched Android config fragments
 android/configs/android-*.cfg
+# Misc files
+drivers/platform/msm/ipa/ipa_common
+net/wireguard/*

@@ -711,6 +711,7 @@ static void ks8851_rx_pkts3(struct ks8851_net *ks)
 			index32 = 0;
 			rxpkt = (u8 *)&buf32[index32];
 		}
+
 		/* end DMA access and dequeue packet */
 		ks8851_wrreg16(ks, KS_RXQCR, ks->rc_rxqcr | RXQCR_RRXEF);
 	}

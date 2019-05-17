@@ -550,7 +550,7 @@ asmlinkage __visible void __init start_kernel(void)
 				  -1, -1, NULL, &unknown_bootoption);
 	if (!IS_ERR_OR_NULL(after_dashes))
 		parse_args("Setting init args", after_dashes, NULL, 0, -1, -1,
-			   set_init_arg);
+			   NULL, set_init_arg);
 
 	/*
 	 * These use large bootmem allocations and must precede

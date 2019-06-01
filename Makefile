@@ -404,7 +404,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-delete-null-pointer-checks \
 		   -O2 -mtune=cortex-a53 -fmodulo-sched -fmodulo-sched-allow-regmoves \
 		   -mfloat-abi=softfp -mfpu=vfpv4 \
-		   -Wno-unused -Wno-array-bounds \
+		   -Wno-unused -Wno-array-bounds -Wno-misleading-indentation \
 		   -std=gnu89
 
 KBUILD_AFLAGS_KERNEL :=

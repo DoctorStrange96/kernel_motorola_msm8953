@@ -4,13 +4,13 @@
 ## AnyKernel setup
 # begin properties
 properties() { '
-kernel.string=Optimus Drunk Kernel by GtrCraft
+kernel.string=MadKernel by Ashwatthama
 do.devicecheck=1
 do.modules=0
 do.cleanup=1
 do.cleanuponabort=0
-device.name1=potter
-device.name2=potter_retail
+device.name1=sanders
+device.name2=sanders_retail
 '; } # end properties
 
 # shell variables
@@ -33,7 +33,7 @@ dump_boot;
 
 backup_file init.rc;
 
-insert_line init.rc "init.optimus.rc" after "import /init.usb.configfs.rc" "import /init.optimus.rc";
+insert_line init.rc "init.mad.rc" after "import /init.usb.configfs.rc" "import /init.mad.rc";
 
 # end ramdisk changes
 

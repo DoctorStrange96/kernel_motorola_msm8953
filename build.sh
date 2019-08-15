@@ -6,12 +6,12 @@ DATE_POSTFIX=$(date +"%Y%m%d")
 
 ## Copy this script inside the kernel directory
 KERNEL_DIR=$PWD
-KERNEL_TOOLCHAIN=$ANDROIDDIR/kernel/prebuilts/aarch64-linux-gnu/bin/aarch64-linux-gnu-
-CLANG_TOOLCHAIN=$ANDROIDDIR/kernel/prebuilts/clang-r353983d/bin/clang-9
-KERNEL_DEFCONFIG=potter_defconfig
+KERNEL_TOOLCHAIN=/home/saipaivardha/prebuilts/aarch64-linux-gnu/bin/aarch64-linux-android-
+CLANG_TOOLCHAIN=/home/saipaivardha/prebuilts/clang/bin/clang-9
+KERNEL_DEFCONFIG=sanders_defconfig
 DTBTOOL=$KERNEL_DIR/Dtbtool/
 ANY_KERNEL3_DIR=$KERNEL_DIR/AnyKernel3/
-FINAL_KERNEL_ZIP=Optimus_Drunk_Potter-$DATE_POSTFIX-HMP.zip
+FINAL_KERNEL_ZIP=MadKernel-Sanders-$DATE_POSTFIX.zip
 # Speed up build process
 MAKE="./makeparallel"
 
@@ -65,7 +65,7 @@ cp $KERNEL_DIR/out/arch/arm64/boot/dtb $ANY_KERNEL3_DIR/
 echo "**** Time to zip up! ****"
 cd $ANY_KERNEL3_DIR/
 zip -r9 $FINAL_KERNEL_ZIP * -x README $FINAL_KERNEL_ZIP
-cp $KERNEL_DIR/AnyKernel3/$FINAL_KERNEL_ZIP $ANDROIDDIR/kernel/$FINAL_KERNEL_ZIP
+cp $KERNEL_DIR/AnyKernel3/$FINAL_KERNEL_ZIP /home/saipaivardha/MadKernels/$FINAL_KERNEL_ZIP
 
 echo "**** Good Bye!! ****"
 cd $KERNEL_DIR
@@ -74,6 +74,7 @@ rm -rf $ANY_KERNEL3_DIR/$FINAL_KERNEL_ZIP
 rm -rf AnyKernel3/Image.gz
 rm -rf AnyKernel3/dtb
 rm -rf $KERNEL_DIR/out/
+echo "MadKernels/($FINAL_KERNEL_ZIP)"
 
 BUILD_END=$(date +"%s")
 DIFF=$(($BUILD_END - $BUILD_START))

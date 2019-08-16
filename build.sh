@@ -1,8 +1,8 @@
 #!/bin/bash
+#Abort on Errors
+set -e
 
-#set -e
-
-DATE_POSTFIX=$(date +"%Y%m%d")
+DATE_POSTFIX=$(date +"%Y%m%d%H%M%S")
 
 ## Copy this script inside the kernel directory
 KERNEL_DIR=$PWD
